@@ -4,10 +4,11 @@ import prisma from "@/db";
 import jwt from "jsonwebtoken";
 
 export async function POST(req: NextRequest){
-    const data = await req.json();
-    const recievedPassword  = data.password;
-    const recievedEmail = data.email;
-    const user  = await prisma.user.findUnique({
+    try{
+        const data = await req.json();
+        const recievedPassword  = data.password;
+        const recievedEmail = data.email;
+        const user  = await prisma.user.findUnique({
         where:{
             email: recievedEmail,
         },
@@ -63,6 +64,13 @@ export async function POST(req: NextRequest){
                 )
             }
         }
+    }
+    }catch(err){
+        console.log("Error: ", err);
+        return NextResponse.json(
+            {error: "Internal server error"},
+            {status: 500}
+        )
     }
 }
 
