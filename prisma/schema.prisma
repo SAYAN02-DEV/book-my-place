@@ -20,6 +20,7 @@ model User{
   email String @unique
   password String
   oauth Boolean @default(false)
+  tickets Ticket[]
 }
 
 model Movie {
@@ -38,4 +39,10 @@ model Theater{
   longitude Float
   address String?
   movies Movie[]
+}
+
+model Ticket{
+  id Int @id @default(autoincrement())
+  ownerId Int
+  owner User @relation(fields: [ownerId], references: [id])
 }
