@@ -21,3 +21,21 @@ model User{
   password String
   oauth Boolean @default(false)
 }
+
+model Movie {
+  id Int @id @default(autoincrement())
+  title String
+  duration Int
+  theaters Theater[]
+}
+
+model Theater{
+  id Int @id @default(autoincrement())
+  name String @default("anonymous")
+  created_at DateTime @default(now())
+  email String @unique
+  latitude Float
+  longitude Float
+  address String?
+  movies Movie[]
+}
