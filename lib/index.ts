@@ -1,6 +1,6 @@
 import prisma from "@/db";
 
-interface station{
+type station = {
     id: number,
     name: string,
     latitude: number,
@@ -17,7 +17,7 @@ Optionally filter by movie ID to get theaters showing a specific movie
 const fetchStations = async (
   userLat: number,
   userLong: number,
-  radius: number,
+  radius: number = 20,
   movieId?: number
 ): Promise<stationList> => {
   if (movieId) {
@@ -83,6 +83,7 @@ const fetchStations = async (
   return theaters;
 };
 
+export default fetchStations;
 /*
 
 */
