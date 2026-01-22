@@ -8,6 +8,5 @@ export async function GET(req: NextRequest){
     const movieid = searchParams.get('mid') ? parseFloat(searchParams.get('mid')!) : undefined;
 
     const response = await fetchStations(latitude, longitude, 20, movieid);
-    console.log(response);
     return NextResponse.json(response)
 }
