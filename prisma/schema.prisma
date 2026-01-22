@@ -27,7 +27,7 @@ model Movie {
   id Int @id @default(autoincrement())
   title String
   duration Int
-  theaters Theater[]
+  shows Show[]
 }
 
 model Theater{
@@ -38,11 +38,38 @@ model Theater{
   latitude Float
   longitude Float
   address String?
-  movies Movie[]
+  shows Show[]
 }
 
-model Ticket{
+model Ticket {
   id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
   ownerId Int
   owner User @relation(fields: [ownerId], references: [id])
+  showId Int
+  show Show @relation(fields: [showId], references: [id])
+  seats Seat[] 
+}
+
+model Show {
+  id Int @id @default(autoincrement())
+  startTime DateTime
+  price Int
+  movieId Int
+  movie Movie @relation(fields: [movieId], references: [id])
+  theaterId Int
+  theater Theater @relation(fields: [theaterId], references: [id])
+  seats Seat[]
+  tickets Ticket[]
+}
+
+model Seat {
+  id Int @id @default(autoincrement())
+  seatNo String
+  row String
+  isBooked Boolean @default(false)
+  lockedAt DateTime?
+  showId Int
+  show Show @relation(fields: [showId], references: [id])
+  tickets Ticket[]
 }

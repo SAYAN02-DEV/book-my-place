@@ -14,8 +14,10 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
+    "mapbox-gl": "^3.18.0",
     "next": "16.1.2",
     "pg": "^8.17.1",
     "prisma": "^7.2.0",
