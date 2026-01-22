@@ -1,20 +1,35 @@
 "use client"
 import React, { useState } from 'react'
 import { useMap } from '@/contexts/MapContext';
-
+import axios from 'axios'
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { addMarker, removeMarker, markers } = useMap();
 
-  const handleAddMarker = () => {
-    addMarker({
-      id: `marker-${Date.now()}`,
-      longitude: 85.4373,
-      latitude: 23.4073,
-      color: '#FF0000',
-      popup: '<h3>Times Square</h3>'
+  const [data, setData] = useState();
+
+  const handleAddMarker = async () => {
+    const response = await axios.get("/api/v1/locations",
+      {
+      params: {
+        lat: 23.4073,
+        long: 85.4373,
+        mid: 15,
+      },
+    }
+  );
+    setData(response.data);
+    response.data.forEach((theater: any) => {
+      addMarker({
+        id: `theater-${theater.id}`,
+        longitude: theater.longitude,
+        latitude: theater.latitude,
+        color: '#FF0000',
+        popup: `<h3>${theater.name}</h3><p>Distance: ${theater.distance.toFixed(2)} km</p>`
+      });
     });
   };
+
   return (
     <div className={`absolute top-0 left-0 z-10 bg-white rounded-r-lg shadow-md h-screen w-64 transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-56'}`}>
       <div className="p-4">

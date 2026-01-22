@@ -22,7 +22,7 @@ const fetchStations = async (
 ): Promise<stationList> => {
   if (movieId) {
     const theaters = await prisma.$queryRaw<stationList>`
-      SELECT 
+      SELECT DISTINCT
         t.id,
         t.name,
         t.latitude,
@@ -37,8 +37,8 @@ const fetchStations = async (
           )
         ) AS distance
       FROM "Theater" t
-      INNER JOIN "_MovieToTheater" mt ON t.id = mt."B"
-      WHERE mt."A" = ${movieId}
+      INNER JOIN "Show" s ON t.id = s."theaterId"
+      WHERE s."movieId" = ${movieId}
         AND (
           6371 * acos(
             cos(radians(${userLat}))

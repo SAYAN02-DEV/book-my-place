@@ -9,5 +9,5 @@ export async function GET(req: NextRequest){
 
     const response = await fetchStations(latitude, longitude, 20, movieid);
     console.log(response);
-    return NextResponse.json({message: 'ok'})
+    return NextResponse.json(response)
 }
