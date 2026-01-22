@@ -13,16 +13,29 @@ type Theater = {
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { addMarker, removeMarker, markers } = useMap();
+  const { addMarker, removeMarker, markers, setRoute } = useMap();
   const [data, setData] = useState<Theater[]>([]);
   const [selectedTheater, setSelectedTheater] = useState<number>();
+  const [userLocation, setUserLocation] = useState({ lat: 23.4073, long: 85.4373 });
+
+  // Get user location
+  useState(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        setUserLocation({
+          lat: pos.coords.latitude,
+          long: pos.coords.longitude
+        });
+      });
+    }
+  });
 
   const handleAddMarker = async () => {
     const response = await axios.get("/api/v1/locations",
       {
       params: {
-        lat: 23.4073,
-        long: 85.4373,
+        lat: userLocation.lat,
+        long: userLocation.long,
         mid: 15,
       },
     }
@@ -41,8 +54,13 @@ const Sidebar = () => {
 
   };
 
-  const handleSelect = (id: number) => {
+  const handleSelect = async (id: number) => {
     setSelectedTheater(id);
+    const selectedTheaterData = data.find(t => t.id === id);
+    
+    if (!selectedTheaterData) return;
+
+    // Remove other markers
     data.forEach((theater: any) => {
       if(theater.id !== id){
         removeMarker(`theater-${theater.id}`);
@@ -55,7 +73,33 @@ const Sidebar = () => {
           popup: `<h3>${theater.name}</h3><p>Distance: ${theater.distance.toFixed(2)} km</p>`
         })
       }
-    })
+    });
+
+    // Fetch directions from Mapbox
+    try {
+      const accessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
+      const response = await axios.get(
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${userLocation.long},${userLocation.lat};${selectedTheaterData.longitude},${selectedTheaterData.latitude}`,
+        {
+          params: {
+            access_token: accessToken,
+            geometries: 'geojson',
+            overview: 'full'
+          }
+        }
+      );
+
+      if (response.data.routes && response.data.routes.length > 0) {
+        const routeData = response.data.routes[0];
+        setRoute({
+          coordinates: routeData.geometry.coordinates,
+          duration: routeData.duration,
+          distance: routeData.distance
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching directions:', error);
+    }
   }
 
   return (
