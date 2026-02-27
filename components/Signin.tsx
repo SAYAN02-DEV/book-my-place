@@ -1,12 +1,52 @@
+import axios from 'axios';
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface SigninProps {
   onClose?: () => void;
 }
 
 const Signin = ({ onClose }: SigninProps) => {
-  const [phoneNumber, setPhoneNumber] = useState('')
+  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  const clickSignin = async () => {
+    setError('');
+    setLoading(true);
+    
+    try {
+      const response = await axios.post('/api/v1/login', {
+        password: password,
+        email: email
+      });
+      
+      if (response.status === 200 && response.data.token) {
+        // Store the token
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('email', email);
+        
+        // Close modal if provided
+        if (onClose) {
+          onClose();
+        }
+        console.log("signing suceed")
+        // Redirect to home page
+        router.push('/home');
+      }
+    } catch (err: any) {
+      if (err.response) {
+        setError(err.response.data.message || 'Login failed');
+      } else {
+        setError('Network error. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
     <div className="w-full max-w-lg mx-auto p-8 bg-white rounded-2xl">
       {/* Header */}
@@ -60,26 +100,48 @@ const Signin = ({ onClose }: SigninProps) => {
 
       {/* Mobile Number Input */}
       <div className="mb-8">
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-3 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-            <span className="text-2xl">🇮🇳</span>
-            <span className="text-gray-700 font-medium">+91</span>
-            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+        <div className="flex gap-2">          
           <input
             type="tel"
-            placeholder="Continue with mobile number"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder="Enter you username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 text-gray-700"
           />
         </div>
       </div>
 
+      {/*password*/}
+      <div className="mb-8">
+        <div className="flex gap-2">
+          <input
+            type="password"
+            placeholder="Enter you password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-gray-400 text-gray-700"
+          />
+        </div>
+      </div>
+      
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+      
+      <div className='flex justify-center'>
+        <button 
+          onClick={clickSignin}
+          disabled={loading || !email || !password}
+          className='btn disabled:opacity-50 disabled:cursor-not-allowed'
+        >
+          {loading ? 'Signing in...' : 'Signin'}
+        </button>
+      </div>
+
       {/* Terms and Privacy */}
-      <p className="text-center text-sm text-gray-600">
+      <p className="text-center text-sm text-gray-600 mb-4">
         I agree to{' '}
         <a href="#" className="text-blue-600 hover:underline">
           Terms & Conditions
@@ -88,6 +150,14 @@ const Signin = ({ onClose }: SigninProps) => {
         <a href="#" className="text-blue-600 hover:underline">
           Privacy Policy
         </a>
+      </p>
+
+      {/* Register Link */}
+      <p className="text-center text-sm text-gray-600">
+        Don't have an account?{' '}
+        <Link href="/auth/register" className="text-blue-600 hover:underline font-semibold">
+          Register here
+        </Link>
       </p>
     </div>
   )
