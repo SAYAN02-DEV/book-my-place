@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
@@ -30,7 +30,7 @@ interface Ticket {
   }>;
 }
 
-const BookingSuccessPage = () => {
+const BookingSuccessContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const ticketId = searchParams.get('ticketId');
@@ -217,6 +217,21 @@ const BookingSuccessPage = () => {
 
       <Footer />
     </div>
+  )
+}
+
+const BookingSuccessPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-base-100">
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </div>
+    }>
+      <BookingSuccessContent />
+    </Suspense>
   )
 }
 

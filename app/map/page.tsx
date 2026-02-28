@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Map from '@/components/Map'
 import Sidebar from '@/components/Sidebar'
@@ -8,7 +8,7 @@ import { MapProvider } from '@/contexts/MapContext'
 
 export const dynamic = 'force-dynamic'
 
-const MapPage = () => {
+const MapContent = () => {
     const searchParams = useSearchParams();
     const [latitude, setLatitude] = useState<number | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
@@ -88,6 +88,21 @@ const MapPage = () => {
           <Map latitude={latitude} longitude={longitude}></Map>
       </div>
     </MapProvider>
+  )
+}
+
+const MapPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen bg-base-100">
+        <div className="text-center">
+          <span className="loading loading-spinner loading-lg mb-4"></span>
+          <p className="text-lg">Loading map...</p>
+        </div>
+      </div>
+    }>
+      <MapContent />
+    </Suspense>
   )
 }
 
