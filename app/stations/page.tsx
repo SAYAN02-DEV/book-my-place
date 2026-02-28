@@ -4,6 +4,8 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 
+export const dynamic = 'force-dynamic'
+
 interface Theater {
   id: number;
   name: string;

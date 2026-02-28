@@ -4,6 +4,8 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
+export const dynamic = 'force-dynamic'
+
 interface ShowDetails {
   movie: {
     title: string;

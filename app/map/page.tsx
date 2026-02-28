@@ -6,6 +6,8 @@ import Map from '@/components/Map'
 import Sidebar from '@/components/Sidebar'
 import { MapProvider } from '@/contexts/MapContext'
 
+export const dynamic = 'force-dynamic'
+
 const MapPage = () => {
     const searchParams = useSearchParams();
     const [latitude, setLatitude] = useState<number | null>(null);
