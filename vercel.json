@@ -1,0 +1,12 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "JWT_SECRET": "@jwt_secret",
+    "HASH_ROUND": "@hash_round",
+    "MAPBOX_API_KEY": "@mapbox_api_key",
+    "NEXT_PUBLIC_MAPBOX_API_KEY": "@next_public_mapbox_api_key"
+  }
+}
