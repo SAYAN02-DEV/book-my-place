@@ -4,6 +4,8 @@ import { useParams, useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 
+export const dynamic = 'force-dynamic'
+
 interface Seat {
   id: number;
   seatNo: string;

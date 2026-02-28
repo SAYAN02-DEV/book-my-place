@@ -1,8 +1,10 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
+
+export const dynamic = 'force-dynamic'
 
 interface ShowDetails {
   movie: {
@@ -17,7 +19,7 @@ interface ShowDetails {
   price: number;
 }
 
-const PaymentPage = () => {
+const PaymentContent = () => {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -245,5 +247,20 @@ const PaymentPage = () => {
     </div>
   );
 };
+
+const PaymentPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-base-100">
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </div>
+    }>
+      <PaymentContent />
+    </Suspense>
+  )
+}
 
 export default PaymentPage;
