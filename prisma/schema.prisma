@@ -27,6 +27,7 @@ model Movie {
   id Int @id @default(autoincrement())
   title String
   duration Int
+  imageUrl String?
   shows Show[]
 }
 

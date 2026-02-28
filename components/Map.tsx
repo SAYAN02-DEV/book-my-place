@@ -10,11 +10,12 @@ type MapProps = {
 }
 
 const Map = ({ latitude, longitude }: MapProps) => {
-    const { markers } = useMap();
+    const { markers, route } = useMap();
     const mapRef = useRef<mapboxgl.Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const markerRef = useRef<mapboxgl.Marker | null>(null);
     const markersRef = useRef<globalThis.Map<string, mapboxgl.Marker>>(new globalThis.Map());
+    const routeLayerId = 'route';
     const acessToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
     
     // Initialize map only once
@@ -82,6 +83,66 @@ const Map = ({ latitude, longitude }: MapProps) => {
             }
         });
     }, [markers]);
+
+    // Update route when it changes
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        const map = mapRef.current;
+
+        // Wait for map to load
+        if (!map.isStyleLoaded()) {
+            map.once('load', () => updateRoute());
+        } else {
+            updateRoute();
+        }
+
+        function updateRoute() {
+            if (!mapRef.current) return;
+
+            // Remove existing route
+            if (mapRef.current.getLayer(routeLayerId)) {
+                mapRef.current.removeLayer(routeLayerId);
+            }
+            if (mapRef.current.getSource(routeLayerId)) {
+                mapRef.current.removeSource(routeLayerId);
+            }
+
+            // Add new route
+            if (route && route.coordinates.length > 0) {
+                mapRef.current.addSource(routeLayerId, {
+                    type: 'geojson',
+                    data: {
+                        type: 'Feature',
+                        properties: {},
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: route.coordinates
+                        }
+                    }
+                });
+
+                mapRef.current.addLayer({
+                    id: routeLayerId,
+                    type: 'line',
+                    source: routeLayerId,
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': '#3b82f6',
+                        'line-width': 4
+                    }
+                });
+
+                // Fit bounds to show entire route
+                const bounds = new mapboxgl.LngLatBounds();
+                route.coordinates.forEach(coord => bounds.extend(coord as [number, number]));
+                mapRef.current.fitBounds(bounds, { padding: 50 });
+            }
+        }
+    }, [route]);
 
   return (
     <div id='map-container' ref = {mapContainerRef} className='absolute top-0 left-0 h-screen w-full'></div>

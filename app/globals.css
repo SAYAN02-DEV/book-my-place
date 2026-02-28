@@ -1,1 +1,96 @@
 @import "tailwindcss";
+@plugin "daisyui";
+
+/* DaisyUI Theme Configuration */
+@theme {
+  --color-base-100: #ffffff;
+  --color-base-200: #f3f4f6;
+  --color-base-300: #e5e7eb;
+  --color-base-content: #1f2937;
+  --color-primary: #3b82f6;
+  --color-primary-content: #ffffff;
+  --color-secondary: #8b5cf6;
+  --color-secondary-content: #ffffff;
+  --color-accent: #10b981;
+  --color-accent-content: #ffffff;
+  --color-neutral: #374151;
+  --color-neutral-content: #ffffff;
+  --color-info: #3b82f6;
+  --color-info-content: #ffffff;
+  --color-success: #10b981;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #ffffff;
+  --color-error: #ef4444;
+  --color-error-content: #ffffff;
+}
+
+/* Force light theme */
+:root {
+  color-scheme: light;
+}
+
+/* Base styles */
+body {
+  @apply bg-white text-gray-900;
+}
+
+/* Ensure all backgrounds are light */
+.bg-base-100 {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+.bg-base-200 {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+.bg-base-300 {
+  background-color: #e5e7eb !important;
+  color: #1f2937 !important;
+}
+
+/* Card styles */
+.card {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+/* Input and button styles */
+.input, .btn, .select, .textarea {
+  background-color: #ffffff;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #ffffff;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Dropdown */
+.dropdown-content {
+  background-color: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+/* Override any dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: light;
+  }
+  
+  body {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+  }
+}
