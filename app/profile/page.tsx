@@ -1,57 +1,26 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-interface User {
-  name: string;
-  email: string;
-  created_at: string;
-}
-
-const ProfilePage = () => {
+export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [ticketCount, setTicketCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<'bookings' | 'settings'>('bookings');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    const email = localStorage.getItem('email');
-
-    if (!token || !email) {
-      router.push('/auth/login');
-      return;
-    }
-
-    // Set user from localStorage
-    setUser({
-      name: 'User',
-      email: email,
-      created_at: new Date().toISOString()
-    });
-
-    // Fetch user's booking count
-    fetch('/api/v1/booking', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    const storedEmail = localStorage.getItem('email');
+    if (!token || !storedEmail) { router.push('/auth/login'); return; }
+    setEmail(storedEmail);
+    fetch('/api/v1/booking', { headers: { 'Authorization': `Bearer ${token}` } })
       .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setTicketCount(data.tickets.length);
-        }
-        setLoading(false);
-      })
-      .catch(error => {
-        console.error('Error fetching bookings:', error);
-        setLoading(false);
-      });
+      .then(data => { if (data.success) setTicketCount(data.tickets.length); setLoading(false); })
+      .catch(() => setLoading(false));
   }, [router]);
 
   const handleLogout = () => {
@@ -60,134 +29,185 @@ const ProfilePage = () => {
     router.push('/home');
   };
 
+  const initials = email ? email.slice(0, 2).toUpperCase() : 'U';
+  const displayName = email ? email.split('@')[0] : 'User';
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-base-100">
-        <Navbar />
-        <div className="flex justify-center items-center h-screen">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-base-100">
-        <Navbar />
-        <div className="flex flex-col justify-center items-center h-screen">
-          <p className="text-2xl mb-4">Please login to view profile</p>
-          <Link href="/auth/login" className="btn btn-primary">Login</Link>
-        </div>
+      <div className="min-h-screen bg-[#f8f6f6] flex items-center justify-center">
+        <span className="material-symbols-outlined text-[#e63743] text-4xl animate-spin">refresh</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-100">
-      <Navbar />
-      
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-5xl font-bold mb-12">My Profile</h1>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {/* Profile Info Card */}
-          <div className="md:col-span-2">
-            <div className="card bg-base-200 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title text-3xl mb-6">Account Information</h2>
-                
-                <div className="space-y-6">
-                  <div>
-                    <label className="text-sm opacity-50">Name</label>
-                    <p className="text-xl font-semibold">{user.name}</p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm opacity-50">Email</label>
-                    <p className="text-xl font-semibold">{user.email}</p>
-                  </div>
-
-                  <div>
-                    <label className="text-sm opacity-50">Member Since</label>
-                    <p className="text-xl font-semibold">
-                      {new Date(user.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="divider"></div>
-
-                <button 
-                  onClick={handleLogout}
-                  className="btn btn-error btn-outline"
-                >
-                  Logout
-                </button>
-              </div>
+    <div className="min-h-screen bg-[#f8f6f6] text-slate-900">
+      {/* Navbar */}
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/home" className="flex items-center gap-2 text-[#e63743] font-bold text-xl">
+            <span className="material-symbols-outlined">movie</span>BookMyPlace
+          </Link>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link href="/movies" className="text-slate-600 hover:text-[#e63743] transition-colors">Movies</Link>
+            <Link href="/stations" className="text-slate-600 hover:text-[#e63743] transition-colors">Theaters</Link>
+            <div className="w-8 h-8 rounded-full bg-[#e63743] flex items-center justify-center text-white text-xs font-bold">
+              {initials}
             </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="space-y-6">
-            <div className="card bg-primary text-primary-content shadow-xl">
-              <div className="card-body">
-                <h3 className="card-title">Total Bookings</h3>
-                <p className="text-5xl font-bold">{ticketCount}</p>
-              </div>
-            </div>
-
-            <div className="card bg-base-200 shadow-xl">
-              <div className="card-body">
-                <h3 className="card-title mb-4">Quick Links</h3>
-                <div className="space-y-2">
-                  <Link href="/profile/booked" className="btn btn-outline w-full">
-                    View All Bookings
-                  </Link>
-                  <Link href="/movies" className="btn btn-outline w-full">
-                    Browse Movies
-                  </Link>
-                  <Link href="/stations" className="btn btn-outline w-full">
-                    Browse Theaters
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+          </nav>
         </div>
+      </header>
 
-        {/* Recent Activity */}
-        <div className="mt-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold">Recent Bookings</h2>
-            <Link href="/profile/booked" className="btn btn-primary btn-sm">
-              View All
+      <div className="max-w-5xl mx-auto px-4 py-10 flex flex-col md:flex-row gap-6">
+        {/* Left Sidebar */}
+        <aside className="md:w-72 shrink-0 space-y-4">
+          {/* Avatar Card */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 text-center">
+            <div className="w-20 h-20 rounded-full bg-[#e63743] flex items-center justify-center text-white text-2xl font-black mx-auto mb-3">
+              {initials}
+            </div>
+            <h2 className="text-lg font-bold capitalize">{displayName}</h2>
+            <p className="text-slate-500 text-sm truncate">{email}</p>
+            <p className="text-xs text-slate-400 mt-1">Member since {new Date().getFullYear()}</p>
+
+            <button
+              onClick={handleLogout}
+              className="mt-4 w-full flex items-center justify-center gap-2 py-2 border border-red-200 text-red-500 rounded-xl text-sm font-semibold hover:bg-red-50 transition-colors"
+            >
+              <span className="material-symbols-outlined text-sm">logout</span>
+              Logout
+            </button>
+          </div>
+
+          {/* Loyalty Card */}
+          <div className="bg-gradient-to-br from-[#e63743] to-[#b52c36] rounded-2xl p-5 text-white">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs font-bold uppercase tracking-widest opacity-80">Loyalty Status</span>
+              <span className="material-symbols-outlined text-lg">star</span>
+            </div>
+            <p className="text-2xl font-black">{ticketCount >= 10 ? 'Gold' : ticketCount >= 5 ? 'Silver' : 'Bronze'}</p>
+            <p className="text-xs opacity-70 mt-1">{ticketCount} bookings completed</p>
+            <div className="mt-3 h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-all"
+                style={{ width: `${Math.min((ticketCount / 10) * 100, 100)}%` }}
+              />
+            </div>
+            <p className="text-[10px] opacity-60 mt-1">{Math.max(10 - ticketCount, 0)} more to reach Gold</p>
+          </div>
+        </aside>
+
+        {/* Right Main Content */}
+        <div className="flex-1 space-y-4">
+          {/* Stats */}
+          <div className="bg-white rounded-2xl border border-slate-200 p-6">
+            <h3 className="font-bold text-base mb-4">Account Stats</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-3 bg-[#e63743]/5 rounded-xl">
+                <p className="text-3xl font-black text-[#e63743]">{ticketCount}</p>
+                <p className="text-xs text-slate-500 mt-1">Total Bookings</p>
+              </div>
+              <div className="text-center p-3 bg-slate-50 rounded-xl">
+                <p className="text-3xl font-black text-slate-700">0</p>
+                <p className="text-xs text-slate-500 mt-1">Upcoming</p>
+              </div>
+              <div className="text-center p-3 bg-slate-50 rounded-xl">
+                <p className="text-3xl font-black text-slate-700">{ticketCount}</p>
+                <p className="text-xs text-slate-500 mt-1">Watched</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div className="flex border-b border-slate-100">
+              <button
+                onClick={() => setActiveTab('bookings')}
+                className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'bookings' ? 'text-[#e63743] border-b-2 border-[#e63743]' : 'text-slate-500'}`}
+              >
+                Booking History
+              </button>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`flex-1 py-3 text-sm font-semibold transition-colors ${activeTab === 'settings' ? 'text-[#e63743] border-b-2 border-[#e63743]' : 'text-slate-500'}`}
+              >
+                Settings
+              </button>
+            </div>
+
+            <div className="p-6">
+              {activeTab === 'bookings' ? (
+                ticketCount > 0 ? (
+                  <div className="text-center py-4">
+                    <span className="material-symbols-outlined text-4xl text-slate-200 block mb-3">receipt_long</span>
+                    <p className="text-slate-600 mb-4">You have <strong>{ticketCount}</strong> booking(s)</p>
+                    <Link
+                      href="/profile/booked"
+                      className="inline-flex items-center gap-2 bg-[#e63743] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#e63743]/90 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-sm">receipt_long</span>
+                      View All Bookings
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <span className="material-symbols-outlined text-5xl text-slate-200 block mb-3">movie</span>
+                    <p className="text-slate-500 mb-4">No bookings yet</p>
+                    <Link
+                      href="/movies"
+                      className="inline-flex items-center gap-2 bg-[#e63743] text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-[#e63743]/90 transition-colors"
+                    >
+                      Book Your First Ticket
+                    </Link>
+                  </div>
+                )
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                    <div>
+                      <p className="font-medium text-sm">Email Address</p>
+                      <p className="text-slate-500 text-xs">{email}</p>
+                    </div>
+                    <button className="text-xs text-[#e63743] font-medium hover:underline">Edit</button>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-slate-100">
+                    <div>
+                      <p className="font-medium text-sm">Notifications</p>
+                      <p className="text-slate-500 text-xs">Booking confirmations & alerts</p>
+                    </div>
+                    <div className="w-10 h-5 bg-[#e63743] rounded-full flex items-center justify-end px-0.5">
+                      <div className="w-4 h-4 bg-white rounded-full shadow" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <p className="font-medium text-sm">Password</p>
+                      <p className="text-slate-500 text-xs">Last changed recently</p>
+                    </div>
+                    <button className="text-xs text-[#e63743] font-medium hover:underline">Change</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link href="/movies" className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3 hover:border-[#e63743] transition-colors group">
+              <span className="material-symbols-outlined text-[#e63743]">movie</span>
+              <span className="font-medium text-sm">Browse Movies</span>
+            </Link>
+            <Link href="/stations" className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3 hover:border-[#e63743] transition-colors group">
+              <span className="material-symbols-outlined text-[#e63743]">location_on</span>
+              <span className="font-medium text-sm">Find Theaters</span>
             </Link>
           </div>
-
-          {ticketCount > 0 ? (
-            <div className="alert alert-info">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              <span>You have {ticketCount} booking(s). Click "View All" to see details.</span>
-            </div>
-          ) : (
-            <div className="text-center py-16 card bg-base-200">
-              <p className="text-xl opacity-50 mb-4">No bookings yet</p>
-              <Link href="/movies" className="btn btn-primary">
-                Book Your First Ticket
-              </Link>
-            </div>
-          )}
         </div>
       </div>
 
-      <Footer />
+      <footer className="mt-8 border-t border-slate-200 bg-white py-6 text-center">
+        <p className="text-slate-400 text-sm">© 2024 BookMyPlace Entertainment Pvt. Ltd. All Rights Reserved.</p>
+      </footer>
     </div>
-  )
+  );
 }
-
-export default ProfilePage
